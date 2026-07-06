@@ -1,0 +1,247 @@
+// Project of vending machine that contains three products newspaper, cadbury_bar, juice. The money inserted can be Rs.5, Rs.10, Rs.20
+// We are considering ideal vending machine that also returns the extra money or when you cancel the request
+
+module ven_machine(select_product, money, extra_cash, newspaper, cadbury_bar, juice, balance, clk, reset);
+input [1:0] select_product;
+input [4:0] money;
+input [4:0] extra_cash;
+input clk, reset;
+output reg newspaper, cadbury_bar, juice;
+output reg [4:0] balance;
+reg [2:0] ps, ns; // Registers for storing ps and ns
+
+// Let us define the parameter of states
+parameter [2:0] void=3'b000;
+parameter [2:0] five=3'b001;
+parameter [2:0] ten=3'b010;
+parameter [2:0] fifteen=3'b011;
+ 
+// Let us define the parameters for money inserted
+parameter [4:0] money_5=5'd5;
+parameter [4:0] money_10=5'd10;
+parameter [4:0] money_20=5'd20;
+
+// Let us define the parameter for selected product
+parameter [1:0] select_news=2'b01;
+parameter [1:0] select_bar=2'b10;
+parameter [1:0] select_juice=2'b11;
+
+// initialize the state with void;
+initial
+begin
+ps<=void;
+ns<=void;
+end
+
+// code for deciding the next state based on select product
+always @(posedge clk)
+begin
+if(reset)
+ns<=void;
+else
+case(ps)
+
+// if present state if void or initially vending machine has Rs.0 in it
+void: if((money==money_5)&& (select_product==select_news))
+ns<=five;
+else if((money==money_5)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_5)&&(select_product==select_juice))
+ns<=fifteen;
+else if((money==money_10)&&(select_product==select_news))
+ns<=five;
+else if((money==money_10)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_10)&&(select_product==select_juice))
+ns<=fifteen;
+else if((money==money_20)&&(select_product==select_news))
+ns<=five;
+else if((money==money_20)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_20)&&(select_product==select_juice))
+ns<=fifteen;
+else
+ns<=void;
+
+// if present state is five means initially vending machine has Rs.5 in it
+five:if((money==money_5)&& (select_product==select_news))
+ns<=five;
+else if((money==money_5)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_5)&&(select_product==select_juice))
+ns<=fifteen;
+else if((money==money_10)&&(select_product==select_news))
+ns<=five;
+else if((money==money_10)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_10)&&(select_product==select_juice))
+ns<=fifteen;
+else if((money==money_20)&&(select_product==select_news))
+ns<=five;
+else if((money==money_20)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_20)&&(select_product==select_juice))
+ns<=fifteen;
+
+// if present state is ten means initially vending machine has Rs.10 in it
+ten:if((money==money_5)&& (select_product==select_news))
+ns<=five;
+else if((money==money_5)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_5)&&(select_product==select_juice))
+ns<=fifteen;
+else if((money==money_10)&&(select_product==select_news))
+ns<=five;
+else if((money==money_10)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_10)&&(select_product==select_juice))
+ns<=fifteen;
+else if((money==money_20)&&(select_product==select_news))
+ns<=five;
+else if((money==money_20)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_20)&&(select_product==select_juice))
+ns<=fifteen;
+
+// if present state is fifteen means initially vending machine has Rs.15 in it
+fifteen:if((money==money_5)&& (select_product==select_news))
+ns<=five;
+else if((money==money_5)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_5)&&(select_product==select_juice))
+ns<=fifteen;
+else if((money==money_10)&&(select_product==select_news))
+ns<=five;
+else if((money==money_10)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_10)&&(select_product==select_juice))
+ns<=fifteen;
+else if((money==money_20)&&(select_product==select_news))
+ns<=five;
+else if((money==money_20)&&(select_product==select_bar))
+ns<=ten;
+else if((money==money_20)&&(select_product==select_juice))
+ns<=fifteen;
+
+// default is initial state is void means vending machine has initially no money in it
+default: ns<=void;
+endcase
+ps<=ns;
+end
+
+// code to generate output from vending machine
+always @(posedge clk)
+begin
+case(ps)
+
+// output block for Rs.5 as money input
+five: begin
+if(money>=money_5)
+begin
+newspaper<=1'b1;
+cadbury_bar<=1'b0;
+juice<=1'b0;
+balance=money-money_5;
+$display("Your newspaper will be delivered soon! Thanks for purchasing with us. Here is your balance %d - 5= %d", money, balance);
+end
+end
+
+// output block for Rs.10 as money input
+ten: begin
+if(money==money_5)
+begin
+newspaper<=1'b0;
+cadbury_bar<=1'b0;
+juice<=1'b0;
+$display("If you wish to buy Cadbury bar then Rs.5 is not sufficient. Please enter another Rs.5");
+if(extra_cash>=money_5)
+begin
+newspaper<=1'b0;
+cadbury_bar<=1'b1;
+juice<=1'b0;
+balance=extra_cash-money_5;
+$display("Here is your Cadbury bar ,Enjoy!. Please take your balance= %d ",balance);
+end
+else
+begin
+balance=5'd5;
+$display("Sorry! you will not get Cadbury bar at Rs.5");
+end
+end
+
+else if(money>=money_10)
+begin
+newspaper<=1'b0;
+cadbury_bar<=1'b1;
+juice<=1'b0;
+balance=money-money_10;
+$display("Your Cadbury_bar will be delivered soon! Thanks for purchasing with us. Here is your balance %d - 10 = %d", money, balance);
+end
+end
+
+// output block for Rs.15 as money input
+fifteen: begin
+if(money==money_5)
+begin
+newspaper<=1'b0;
+cadbury_bar<=1'b0;
+juice<=1'b0;
+$display("If you wish to buy juice then Rs.5 is not sufficient. Please enter another Rs.10");
+if(extra_cash>=money_10)
+begin
+newspaper<=1'b0;
+cadbury_bar<=1'b0;
+juice<=1'b1;
+balance=extra_cash-money_10;
+$display("Here is your juice! Please take your balance= %d ",balance);
+end
+else
+balance=5'd5;
+$display("Sorry! you will not get juice at Rs.5");
+end
+
+
+else if(money==money_10)
+begin
+newspaper<=1'b0;
+cadbury_bar<=1'b0;
+juice<=1'b0;
+$display("If you wish to buy juice then Rs.10 is not sufficient. Please enter another Rs.5");
+if(extra_cash>=money_5)
+begin
+newspaper<=1'b0;
+cadbury_bar<=1'b0;
+juice<=1'b1;
+balance=extra_cash-money_5;
+$display("Here is your juice! Please take your balance= %d ",balance);
+end
+else
+begin
+balance=5'd10;
+$display("Sorry! you will not get juice at Rs.10");
+end
+end
+
+else if(money==money_20)
+begin
+newspaper<=1'b0;
+cadbury_bar<=1'b0;
+juice<=1'b1;
+balance=money-15;
+$display("Your juice will be delivered soon! Thanks for purchasing with us. Here is your balance %d - 15 = %d", money, balance);
+end
+end
+
+default: begin
+newspaper<=1'b0;
+cadbury_bar<=1'b0;
+juice<=1'b0;
+balance=5'd0;
+end
+endcase
+end
+endmodule
+
+
+
+

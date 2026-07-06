@@ -1,0 +1,31 @@
+module testbench;
+wire newspaper, cadbury_bar, juice;
+wire [4:0] balance;
+reg reset=1'b0;
+reg clk;
+reg [4:0] money, extra_cash;
+reg [1:0] select_product;
+ven_machine DUT(select_product, money, extra_cash, newspaper, cadbury_bar, juice, balance, clk, reset);
+initial
+begin
+clk=1'b0;
+forever
+#5 clk=~clk;
+end
+
+initial
+begin
+#10 money=5'd0;
+#10 money=5'd5; select_product=2'b01;
+#10 money=5'd5; select_product=2'b10;
+#10 money=5'd10; select_product=2'b10;
+#10 money=5'd20; select_product=2'b11;
+#10 money=5'd5; select_product=2'b10;
+#10 extra_cash=5'd5;
+#10 extra_cash=5'd10;
+#10 money=5'd10; select_product=2'b01;
+#10 money=5'd20; select_product=2'b10;
+#10 $finish;
+end
+endmodule
+
